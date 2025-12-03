@@ -56,9 +56,8 @@ services:
       GX_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       GX_DATASOURCE_DATABASE: ${POSTGRES_DB:-tpcc}
     volumes:
-      - ./gx/config:/app/great_expectations
       - ./gx/scripts:/app/scripts
-      - gx_data:/app/great_expectations/uncommitted
+      - gx_data:/app/gx
     ports:
       - "8888:8888"
       - "8080:8080"
