@@ -255,8 +255,12 @@ docker-compose exec great_expectations python /app/scripts/run_validation.py
 
 ### Full Reset (Recommended between tests)
 ```bash
-# Stop all containers and remove volumes
+# Stop all containers and remove volumes (deletes all data)
 docker-compose down -v
+
+# Verify volumes are removed
+docker volume ls | grep gx-poc
+# Should return nothing
 
 # Restart from Step 2
 docker-compose up -d postgres
@@ -265,6 +269,10 @@ docker-compose up -d great_expectations
 docker-compose exec great_expectations python /app/scripts/init_gx.py
 docker-compose exec great_expectations python /app/scripts/profile_data.py
 ```
+
+**Note:** The `-v` flag removes:
+- `postgres_data` - All PostgreSQL data (TPC-C tables)
+- `gx_data` - All GX expectations and validation results
 
 ### Quick Reset (Keep volumes, re-profile)
 ```bash
