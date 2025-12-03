@@ -15,11 +15,8 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Create GX directory structure
-RUN mkdir -p /app/great_expectations/uncommitted/data_docs \
-    && mkdir -p /app/great_expectations/expectations \
-    && mkdir -p /app/great_expectations/checkpoints \
-    && mkdir -p /app/scripts
+# Create scripts directory
+RUN mkdir -p /app/scripts
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
