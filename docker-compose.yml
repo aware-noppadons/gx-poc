@@ -57,7 +57,7 @@ services:
       GX_DATASOURCE_DATABASE: ${POSTGRES_DB:-tpcc}
     volumes:
       - ./gx/scripts:/app/scripts
-      - gx_data:/app/gx
+      - ./gx/data:/app/gx
     ports:
       - "8888:8888"
       - "8080:8080"
@@ -75,4 +75,3 @@ networks:
 
 volumes:
   postgres_data:
-  gx_data:

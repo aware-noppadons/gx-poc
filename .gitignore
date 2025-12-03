@@ -21,13 +21,8 @@ postgres_data/
 # Great Expectations uncommitted data
 gx/config/uncommitted/
 
-# Great Expectations generated data (when running locally)
-gx/gx/
-gx/expectations/
-gx/checkpoints/
-gx/validations/
-gx/profilers/
-gx/.ge_store_backend_id
+# Great Expectations generated data (bind mount volume)
+gx/data/
 
 # SQLite databases
 *.db

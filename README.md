@@ -255,10 +255,13 @@ docker-compose exec great_expectations python /app/scripts/run_validation.py
 
 ### Full Reset (Recommended between tests)
 ```bash
-# Stop all containers and remove volumes (deletes all data)
+# Stop all containers and remove Docker volumes
 docker-compose down -v
 
-# Verify volumes are removed
+# Delete GX generated data (local bind mount)
+rm -rf gx/data/
+
+# Verify Docker volumes are removed
 docker volume ls | grep gx-poc
 # Should return nothing
 
@@ -272,7 +275,8 @@ docker-compose exec great_expectations python /app/scripts/profile_data.py
 
 **Note:** The `-v` flag removes:
 - `postgres_data` - All PostgreSQL data (TPC-C tables)
-- `gx_data` - All GX expectations and validation results
+
+**Important:** You must manually delete `gx/data/` - it's a local bind mount, not a Docker volume.
 
 ### Quick Reset (Keep volumes, re-profile)
 ```bash
