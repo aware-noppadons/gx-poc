@@ -1,0 +1,79 @@
+services:
+  # PostgreSQL Database Service
+  postgres:
+    image: postgres:15
+    container_name: gx-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-tpcc}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d
+      - ./scripts/data_drift:/scripts/data_drift
+    ports:
+      - "5432:5432"
+    networks:
+      - gx-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-tpcc}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # HammerDB Service for TPC-C Data Generation
+  hammerdb:
+    build:
+      context: ./hammer
+      dockerfile: Dockerfile
+    container_name: gx-hammerdb
+    environment:
+      PG_HOST: postgres
+      PG_PORT: 5432
+      PG_USER: ${POSTGRES_USER:-postgres}
+      PG_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PG_DATABASE: ${POSTGRES_DB:-tpcc}
+      WAREHOUSE_COUNT: ${WAREHOUSE_COUNT:-10}
+      NUM_VU: ${NUM_VU:-4}
+    volumes:
+      - ./hammer/scripts:/hammerdb/scripts/custom
+    networks:
+      - gx-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Great Expectations Service
+  great_expectations:
+    build:
+      context: ./gx
+      dockerfile: Dockerfile
+    container_name: gx-service
+    environment:
+      GX_DATASOURCE_HOST: postgres
+      GX_DATASOURCE_PORT: 5432
+      GX_DATASOURCE_USER: ${POSTGRES_USER:-postgres}
+      GX_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      GX_DATASOURCE_DATABASE: ${POSTGRES_DB:-tpcc}
+    volumes:
+      - ./gx/config:/app/great_expectations
+      - ./gx/scripts:/app/scripts
+      - gx_data:/app/great_expectations/uncommitted
+    ports:
+      - "8888:8888"
+      - "8080:8080"
+    networks:
+      - gx-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+
+networks:
+  gx-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  gx_data:
